@@ -1,0 +1,15 @@
+#container {clear:both;}
+#rules {float:left;margin-left:30px;}
+#canvas {min-width:240px;min-height:240px;display:block;background-color:gray;width:260px;height:260px; background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMq7zlw4ADMIIkF7WrbcEmP+gkAarWGgXyq5CNAAAAAElFTkSuQmCC); }
+.tile, .sinktile   {margin:2px; color:white;}
+.sinktile { background-image: url("../images/sinkhole/sinkhole_tile.png"); background-repeat:repeat  }
+.tile { background-image: url("../images/sinkhole/play_tile.png"); background-repeat:repeat  }
+.tile span {padding-left:35%;padding-top:35%;float:left;}
+.col_8 {float:left; text-align:center;}
+.col_2 {float:left;}
+.emph { color:#80CEE5;font-size:1.3em;}
+#sinkhole, #score {margin-left:30px;margin-top:0.5em;margin-bottom:1em;padding:1em;font-size:30px;min-width:3.5em;min-height:3.5em;color:#FF8B00;display:inline;}
+label {margin-left:30px;font-size:1.6em;color:#243940;font-weight:bold;}
+ #sinkhole { background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMq7zlw4ADMIIkF7WrbcEmP+gkAarWGgXyq5CNAAAAAElFTkSuQmCC);}
+ #score { background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMq7zlw4ADMIIkF7WrbcEmP+gkAarWGgXyq5CNAAAAAElFTkSuQmCC);}
+ 

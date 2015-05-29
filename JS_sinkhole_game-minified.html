@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<title>SinkHole Game</title>
+
+<link rel="stylesheet" href="css/sinkhole.css" type="text/css" media="screen" />
+
+
+<script type="text/javascript">
+
+    var constructTiles = function () {
+      var tiles = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]; // create blank array with 16 spaces
+        for (i = 0; i <=15; i++) { // assign each tile a random tile number
+          tiles[i] = Math.floor(Math.random()* 16 + 1) // random tiles between 0 and 15 + 1 (i.e. 1 to 16)
+        }
+        assembleTiles(); // numbered tiles execute function1
+        tiles.length = 0; // empty the array to a length of zero
+
+	    /*** GLOBAL VARIABLES ***/
+		var dragSrcTile = null; // the original source draggable element
+		var dragParent = null;
+		var dragSrcTileValue = null; // the value of the moved tile // the innerHTML value of the moved tile
+		var dynamicTileValue = null; // the value of the dynamic tile
+		var scoreCard = document.getElementById("score");
+
+	
+        function assembleTiles() {
+          for (i=0; i<=14; i++) { 
+			var div = document.createElement("DIV");		  // Create a <div> element            
+			div.style.width = "22%";
+			div.style.height = "22%";
+			div.style.float = "left";
+			div.styledraggable="true"
+			document.getElementById("canvas").appendChild(div);// Append <div> to <canvas>
+
+			var span = document.createElement("SPAN");		   // Create a <span> element
+			var att = document.createAttribute("id");
+			att.value = "tile"+i;						       // increment tile ID value
+			span.setAttributeNode(att);
+			var t = document.createTextNode(tiles[i]);         // Create a text node
+			span.appendChild(t);                               // Append the text to <span>
+			div.appendChild(span);    						   // Append the <span> to <div>
+	
+			var att = document.createAttribute("class");       // Create a "class" attribute
+			att.value = "tile"; 	                           // Set the value of the class attribute
+			div.setAttributeNode(att); 						   // Append "class" to <div>	
+			
+			var att = document.createAttribute("draggable");   // Create a "draggable" attribute
+			att.value = "true";							 	   // Set the draggable attribute
+			span.setAttributeNode(att); 					   // Append "class" to <span>	
+			
+			var att = document.createAttribute("ondragstart"); // Create a "ondragstart" attribute
+			att.value = "drag(event)";						   // Set the ondragstart attribute
+			span.setAttributeNode(att); 					   // Append "class" to <span>	
+	
+			//*** DRAGGABLE DIV.SPAN TILES ENABLED ***/
+			}
+		    //*** CREATE BLANK TILE VALUE ***/
+		
+		randomize(); // initialize random sinkhole number	
+
+		    //*** CREATE DROPPABLE BLANK TILE ***/
+			
+			var div = document.createElement("DIV");		  // Create a <div> element            
+			div.style.width = "22%";
+			div.style.height = "22%";
+			// div.style.background = "red";
+			// div.style.color = "white";
+			div.style.float = "left";
+			div.style.styledraggable="true";
+			document.getElementById("canvas").appendChild(div);// Append <div> to <canvas>
+	
+			var att = document.createAttribute("class");       // Create a "class" attribute
+			att.value = "sinktile"; 	                           // Set the value of the class attribute
+			div.setAttributeNode(att); 						   // Append "class" to <div>	
+			
+			var att = document.createAttribute("ondrop");      // Create a "ondrop" attribute
+			att.value = "drop(event)";						   // Set the ondrop attribute
+			div.setAttributeNode(att); 						   // Append "class" to <div>	
+
+			var att = document.createAttribute("ondragover");  // Create a "ondragover" attribute
+			att.value = "allowDrop(event)";					   // Set the ondragover attribute
+			div.setAttributeNode(att); 						   // Append "class" to <div>	
+			
+			var att = document.createAttribute("ondragenter"); // Create a "ondragenter" attribute
+			att.value = "return dragEnter(event)";			   // Set the draggable attribute
+			div.setAttributeNode(att); 						   // Append "class" to <div>				
+		}
+		scoreCard.innerHTML = 0; // finally set the scorecard to "ZERO"
+	}
+
+	/*** DRAG AND DROP ITEMS ***/
+	var count = 0; // scorecard move count GLOBAL
+	var successiveSink = false;
+	var successiveSuccess = false;
+	
+	function allowDrop(ev) {
+		ev.preventDefault(); // tile will not do default behavior
+	}	
+	function drag(ev) {
+	dragSrcTile = ev.target.id;
+	dragParent = document.getElementById(dragSrcTile).parentNode; // create global reference to source tile	
+	dragSrcTileValue = ev.target.innerHTML; // record the moved tile value to global reference	
+	ev.dataTransfer.effectAllowed = 'move'; // draggable element is 'move'
+    ev.dataTransfer.setData("Text", ev.target.id); // drag data store 
+	}
+	function dragEnter(ev) {
+    event.preventDefault(); // prevent default action i.e. open link
+    return true;
+    }
+	function drop(ev) 
+	{
+
+    var data = ev.dataTransfer.getData("Text");	
+
+		checkTileValue();
+		
+		function oldTile() {
+			var att = document.createAttribute("ondrop");            // Create a "ondrop" attribute
+			att.value = "drop(event)";							     // Set the ondrop attribute
+			dragParent.setAttributeNode(att); 						 // Append "ondrop" to <div>	
+
+			var att = document.createAttribute("ondragover");        // Create a "ondragover" attribute
+			att.value = "allowDrop(event)";							 // Set the ondragover attribute
+			dragParent.setAttributeNode(att); 						 // Append "ondragover" to <div>	
+			
+			var att = document.createAttribute("ondragenter");       // Create a "ondragenter" attribute
+			att.value = "return dragEnter(event)";			   	     // Set the ondragenter attribute
+			dragParent.setAttributeNode(att); 						 // Append "ondragenter" to <div>	
+
+			var att = document.createAttribute("class");     	     // Create a "class" attribute
+			att.value = "sinktile"; 	                             // Set the value of the class attribute
+			dragParent.setAttributeNode(att); 					     // Append "class" to <div>	
+			
+			dragParent.style.backgroundImage = "url(images/sinkhole/sinkhole_tile.png)";		
+		}
+			
+		function dropEqual() {
+			ev.target.style.backgroundImage = "url(images/sinkhole/sinkhole_tile.png)";	
+			ev.target.appendChild(document.getElementById(data)); // Append Draggable <div> 
+			ev.target.removeChild(ev.target.firstChild); // remove the tile's span element equal to the sinkhole value
+			ev.stopPropagation();	
+		}
+		
+		function dropSinkhole() {
+			ev.target.appendChild(document.getElementById(data)); // Append Draggable <div> 
+			ev.target.parentNode.removeChild(ev.target); // remove the tile's span element equal to the sinkhole value
+			ev.stopPropagation();	
+			alert("SINKHOLE!!!");
+		}		
+		
+		function dropNotEqual() {
+			ev.target.removeAttribute("ondrop");       // Create a "class" attribute
+			ev.target.removeAttribute("ondragover");       // Create a "class" attribute
+			ev.target.removeAttribute("ondragenter");       // Create a "class" attribute
+			var att = document.createAttribute("draggable");       // Create a "draggable" attribute
+			att.value = "true";							   		   // Set the draggable attribute
+			ev.target.setAttributeNode(att); 						   // Append "class" to <div>	
+			
+			ev.target.style.backgroundImage = "url(images/sinkhole/play_tile.png)";
+			
+			var att = document.createAttribute("ondragstart");       // Create a "class" attribute
+			att.value = "drag(event)";							   // Set the draggable attribute
+			ev.target.setAttributeNode(att); 						   // Append "class" to <div>	
+			
+			var att = document.createAttribute("class");     	     // Create a "class" attribute
+			att.value = "tile"; 	                             // Set the value of the class attribute
+			ev.target.setAttributeNode(att); 					     // Append "class" to <div>	
+			
+			ev.target.appendChild(document.getElementById(data));
+			ev.stopPropagation();
+		}
+
+		/*** CHECK TILE VALUE AGAINST MATRIX ***/
+	function checkTileValue() {		
+		 dynamicTileValue = document.getElementById("sinkhole").innerHTML; // bust that number into a LOG
+		 // alert(dragSrcTileValue + dynamicTileValue);
+		if (dynamicTileValue == dragSrcTileValue)  {
+		    // alert("Equal");
+					
+			/*** NEW ATTRIBUTES FOR OLD TILE ***/
+			oldTile();  // copy blank tile to "dragged from" tile
+			
+			/*** NEW ATTRIBUTES FOR DROPPED TILE ***/
+			dropEqual(); // remove equal value from tile
+			if (count == 0) {
+			alterPoints(10); // add 10 Points FULL POINTS
+			successiveSuccess = true;
+			count++; // add one to the count meter and return 
+			// alert("count is " + count);
+				}
+			else if (count >= 1 && successiveSuccess === true) {
+			alterPoints(30); // add 30 Points FULL POINTS
+			count++; // add one to the count meter and return 
+			// alert("successive count is " + count);
+				}
+			else if (count == 1) {
+			alterPoints(5); // add 10 Points FULL POINTS
+			count = 1; // reset the count to ZERO
+				}
+			else if (count == 2) {
+			alterPoints(3); // add 10 Points FULL POINTS
+			count = 0; // reset the count to ZERO
+				}
+			else if (count >= 3) {
+			alterPoints(0); // add 10 Points FULL POINTS
+			count = 0; // reset the count to ZERO
+				}
+			//alert("outer loop count is " + count);				
+			successiveSink = false;
+			successiveSuccess = true;
+	        return randomize(); // generate a new random number
+
+			} else {
+			// alert("Not Equal");
+			oldTile(); // copy blank tile to "dragged from" tile
+			
+			/*** NEW ATTRIBUTES FOR DROPPED TILE ***/
+			dropNotEqual(); // drop dragged tile and make draggable again
+			if (count >= 4) {	
+				  alterPoints("-30"); // remove 30 Points SINKHOLE 
+				  dropSinkhole();
+				  count = 1; // reset the count to ONE
+			  if (successiveSink === true) {
+				  alterPoints("-15"); // remove 15 Points MULTIPLE SINK HOLE
+				  successiveSink = true;
+				  successiveSuccess = false;
+			  }
+			  else if (successiveSink === false){
+				successiveSink = true;
+			  }
+		    } else {
+				alterPoints("-1"); // add -1 Points LESS POINTS	
+			      if (successiveSuccess === true) {
+				    count = 0; // reset the count to ZERO to add to one fail
+					//alert("negative had a success and now a fail count is " + count);
+				  }
+				successiveSuccess = false;
+			  }
+			successiveSuccess = false;
+			count++; // add to the count meter
+			//alert("negative count is " + count);
+			randomize(); // no numbers matched, so randomize with the penalty value
+			return false;
+			}
+
+		} // end checkTileValue()			
+	} // end drop()		
+		/*** EXTERNAL FUNCTION CALLS ***/
+		/*** Alter Points System ***/
+		function alterPoints(v) {
+		document.getElementById("score").innerHTML = parseInt(document.getElementById("score").innerHTML) + parseInt(v);
+		}
+		/*** SINKHOLE RANDOM GENERATE NUMBER ***/
+		function randomize() {
+			var dynamicTile = Math.floor(Math.random()*16+1);  // generate a random number for the red tile 
+			document.getElementById("sinkhole").innerHTML = dynamicTile;
+		  
+		  }
+	
+// event.target.parentNode.removeChild(event.target);
+	window.onload = constructTiles; // hmmm when to load the array into browser?
+</script>
+</head>
+<body>
+
+<h1 lang="zh-Hans">SINKHOLE 《沉落坑》游戏</h1>
+  <div id="container">
+	<div id="canvas" class="col_8">
+	
+	</div>
+	<div class="col_2"><label for="sinkhole">匹配砖的值 | Match Value</label><button id="sinkhole"></button><label for="score">记分卡 | Scorecard</label><button id="score"></button></div>
+  
+    <div id="rules">
+	  <h2 lang="zh-Hans">Rules 游戏规则</h2>
+		<ul>
+		  <li>每个轮没有成功 = <span class="emph">-1分</span> | Each Unsuccessful Turn = -1</li>
+		  <li>第一轮成功 = <span class="emph">10分</span> | 1 Turn = 10 Points</li>
+		  <li>一轮成功，下个轮连续成功 = <span class="emph">30分</span> | Consecutive Successes = 30 Points</li>
+		  <li>第一轮失败，而第二轮成功 = <span class="emph">5分</span> | 2 Turns = 5 Points</li>		  
+		  <li>两个轮失败，而第三轮成功 = <span class="emph">3分</span> | 3 Turns = 3 Points</li>
+		  <li>四个轮失败之后终于一轮是成功 = <span class="emph">0分</span> | 4+ Turns = 0 Points</li>
+		  <li>五个论失败 = <span class="emph">-30分</span>，失去选择的砖 | 5th Turn Sinkhole -30 Points</li>
+		  <li>已经失去个砖，四个轮后连续失败 = <span class="emph">-45分</span>，失去选择的砖 | 9th Turn Consecutive Sinkhole -45 Points</li>	  
+	    </ul>
+       </div>		
+  </div>
+ 
+</body>
+</html>
